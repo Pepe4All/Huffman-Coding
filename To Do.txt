@@ -1,0 +1,224 @@
+  To do:
+1. Create a welcome page
+    -give the user some options to: compress and decompress a file, quit the program
+    -change the color of the text
+        system("color (color code)");  0-9-> background a-f->text color
+        system() function doesn't work on mac and linux, so for this version, it's better to not use it at all
+    
+Welcome page: 
+
+************* file compressor v1.2 *************
+This program uses Huffman coding to compress and
+decompress text files without any data loss
+
+Written by: Akaki Gvelesiani           4/12/2023
+************************************************
+
+
+To compress a file, input:    1
+To decompress a file, input:  2
+To quit the program, input:   3
+
+Enter the input:
+
+2. get the user input and use a switch statement to decide which function to call
+
+3. write the compression algorithm
+
+    - get the file name
+    - check if the input is valid and handle error cases
+    - open the file and read it's contents
+    - create a vector database to store the contents of the text line-by-line
+    - go through the entire text and get every unique character
+    - assign a 'code' to every character
+    - display a message saying:  The data has been analized. 
+
+4. write the decompression algorithm
+
+5. add the "quit" and "back" feature
+
+
+
+
+
+Log 1 				12/4/2023
+The main body of the program was created
+Welcome page has been added, as well as
+the ability to choose the different modes
+
+Log2                13/04/2023
+Added error handling in the switch statement. In case of a wrong input, the program prompts the user to enter the data again.
+Added a feature for the quit() function, which restarts the program in case the user wishes so.
+
+Log3                16/04/2023
+Added error handling in the input fields
+Added a feature to go "back" and "quit" from the compress() function
+Fixed some bugs
+
+
+
+Notes:
+- Need to find a method to write bit-by-bit into a binary file.
+
+
+#include <fstream>
+#include <cstdint>
+
+void write_binary_value(std::ofstream& outfile, uint64_t value, uint8_t size_in_bits) {
+    uint64_t mask = (1ULL << size_in_bits) - 1ULL;
+    uint64_t masked_value = value & mask;
+
+    for (int i = size_in_bits - 1; i >= 0; i--) {
+        uint8_t bit = (masked_value >> i) & 1;
+        outfile.put(bit ? '1' : '0');
+    }
+}
+
+int main() {
+    std::ofstream outfile("data.bin", std::ios::out | std::ios::binary);
+    if (!outfile.is_open()) {
+        std::cerr << "Failed to open file." << std::endl;
+        return 1;
+    }
+
+    uint64_t val1 = 0b1010101010101010;
+    uint64_t val2 = 0b111000111000111000;
+
+    uint8_t size1 = 16;  // 16-bit value
+    uint8_t size2 = 24;  // 24-bit value
+
+    write_binary_value(outfile, val1, size1);
+    write_binary_value(outfile, val2, size2);
+
+    outfile.close();
+
+    return 0;
+}
+
+
+
+for()
+    string binary_string;
+    bitset<8> binary_value(value);
+    string binary_to_str_val = binary_value.to_string();
+
+    for(int k = binary_to_str_val.size() - bits; k < binary_to_str_val.size(); k++){
+        binary_string += binary_to_str_val[k];
+    }
+
+    for(i = 0; i < binary_string.size(); i++){
+        if(binary_string[i] == '1') write_file.put(0b1);
+        else write_file.put(0b0);
+    }
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+
+using namespace std;
+
+void writeBytesToFile(const vector<unsigned char>& bytesList, const string& fileName) {
+    // Open binary file in binary mode
+    ofstream file(fileName, ios::binary | ios::out);
+
+    if (file.is_open()) {
+        // Write bytes to file
+        file.write(reinterpret_cast<const char*>(&bytesList[0]), bytesList.size());
+
+        // Close the file
+        file.close();
+
+        cout << "Bytes written to file: " << fileName << endl;
+    } else {
+        cerr << "Failed to open file: " << fileName << endl;
+    }
+}
+
+vector<unsigned char> convertToBytes(const string& inputString) {
+    vector<unsigned char> bytesList;
+
+    // Ensure input string length is a multiple of 8
+    int inputLength = inputString.length();
+    if (inputLength % 8 != 0) {
+        cout << "Input string length is not a multiple of 8. Padding with 0s..." << endl;
+        int paddingLength = 8 - (inputLength % 8);
+        inputString.append(paddingLength, '0');
+    }
+
+    // Iterate through input string and convert 8 bits to bytes
+    for (int i = 0; i < inputLength; i += 8) {
+        // Convert 8-bit binary string to integer
+        string byteString = inputString.substr(i, 8);
+        
+        // Append byte to bytes list
+        unsigned char byte = static_cast<unsigned char>(stoi(byteString, nullptr, 2));
+        bytesList.push_back(byte);
+    }
+
+    return bytesList;
+}
+
+int main() {
+    // Input string of 0s and 1s
+    string inputString = "1101010101010010";
+
+    // Convert input string to bytes
+    vector<unsigned char> bytesList = convertToBytes(inputString);
+
+    // Write bytes to binary file
+    writeBytesToFile(bytesList, "output.bin");
+
+    return 0;
+}
+
+
+
+string encoded_data;
+
+for(int i = 0; i < input_data.size(); i++){
+
+    // get the number of characters in the line and append it to the string
+    string line_size = int_to_binary_string(input_data[i].size(), 16);
+    encoded_data += line_size;
+
+    string line_var = input_data[i];
+    // loop through every character in the line and append it to the string
+        for(int k = 0; k < line_var.size(); k++){
+            encoded_data += int_to_binary_string(line_var[k], bits);
+        }
+
+}
+
+// add padding
+if (encoded_data.size() % 8 != 0){
+            int paddingLength = 8 - (encoded_data.size() % 8);
+            encoded_data.append(paddingLength, '0');
+        }
+
+// write the data to the output file byte-by-byte
+        for(int n = 0; n < encoded_data.size(); n += 8){
+            // convert the 8-bit binary string to an int and then to a char
+            string byteString = encoded_data.substr(n, 8);
+            unsigned char byte = static_cast<unsigned char>(stoi(byteString, nullptr, 2));
+            write_file.write(reinterpret_cast<const char*>(&byte), 1);
+        }
+
+string int_to_binary_string(int value, int bits){
+    string output;
+    bitset<8> binary_value(value);
+    string binary_to_str_val = binary_value.to_string();
+
+    for(int k = binary_to_str_val.size() - bits; k < binary_to_str_val.size(); k++){
+        output += binary_to_str_val[k];
+    }
+
+    return output;
+}
+
+
+
+
+
+
